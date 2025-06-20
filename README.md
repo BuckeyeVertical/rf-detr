@@ -55,24 +55,11 @@ We validated the performance of RF-DETR on both Microsoft COCO and the RF100-VL 
 
 ## Installation
 
-Pip install the `rfdetr` package in a [**Python>=3.9**](https://www.python.org/) environment.
-
-```bash
-pip install rfdetr
-```
-
-<details>
-<summary>Install from source</summary>
-
-<br>
-
 By installing RF-DETR from source, you can explore the most recent features and enhancements that have not yet been officially released. Please note that these updates are still in development and may not be as stable as the latest published release.
 
 ```bash
-pip install git+https://github.com/roboflow/rf-detr.git
+pip install git+https://github.com/BuckeyeVertical/rf-detr.git
 ```
-
-</details>
 
 
 ## Inference

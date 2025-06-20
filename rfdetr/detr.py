@@ -58,29 +58,32 @@ class RFDETR:
         self.train_from_config(config, **kwargs)
     
     def optimize_for_inference(self, compile=True, batch_size=1, dtype=torch.float32):
-        self.remove_optimized_model()
+        # prepare original for tracing
+        m = self.model.model
+        m.eval()
+        m.to(dtype)
+        m.export()
 
-        self.model.inference_model = deepcopy(self.model.model)
-        self.model.inference_model.eval()
-        self.model.inference_model.export()
-
-        self._optimized_resolution = self.model.resolution
-        self._is_optimized_for_inference = True
-
-        self.model.inference_model = self.model.inference_model.to(dtype=dtype)
-        self._optimized_dtype = dtype
-
+        # trace (no deepcopy → one copy only)
         if compile:
-            self.model.inference_model = torch.jit.trace(
-                self.model.inference_model,
-                torch.randn(
-                    batch_size, 3, self.model.resolution, self.model.resolution, 
-                    device=self.model.device,
-                    dtype=dtype
-                )
+            example = torch.randn(
+                batch_size, 3,
+                self.model.resolution, self.model.resolution,
+                device=self.model.device,
+                dtype=dtype
             )
+            self.model.inference_model = torch.jit.trace(m, example)
             self._optimized_has_been_compiled = True
             self._optimized_batch_size = batch_size
+        else:
+            # if you just want eval + half, you can even skip jit
+            self.model.inference_model = m
+
+        # record metadata
+        self._optimized_resolution = self.model.resolution
+        self._optimized_dtype      = dtype
+        self._is_optimized_for_inference = True
+        torch.cuda.empty_cache()
     
     def remove_optimized_model(self):
         self.model.inference_model = None
