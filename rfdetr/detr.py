@@ -59,6 +59,8 @@ class RFDETR:
     
     def optimize_for_inference(self, compile=True, batch_size=1, dtype=torch.float32):
         # prepare original for tracing
+        if not torch.cuda.is_available():
+            dtype = torch.float32  # CPU must stay float32
         m = self.model.model
         m.eval()
         m.to(dtype)

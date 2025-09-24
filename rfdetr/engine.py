@@ -240,7 +240,8 @@ def coco_extended_metrics(coco_eval):
 
 def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, args=None):
     model.eval()
-    if args.fp16_eval:
+    # Only use .half() if running on CUDA
+    if args.fp16_eval and (hasattr(model, 'device') and 'cuda' in str(model.device)):
         model.half()
     criterion.eval()
 
@@ -257,7 +258,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, arg
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        if args.fp16_eval:
+        if args.fp16_eval and (hasattr(samples.tensors, 'device') and 'cuda' in str(samples.tensors.device)):
             samples.tensors = samples.tensors.half()
 
         # Add autocast for evaluation

@@ -233,7 +233,7 @@ class OnnxOptimizer():
                 if lastNode.o().op == "Cast":
                     lastNode = lastNode.o()
                 inputList = [inputTensor, constantGamma, constantBeta]
-                groupNormV = gs.Variable("GroupNormV-" + str(nGroupNormPlugin), np.dtype(np.float16), inputTensor.shape)
+                groupNormV = gs.Variable("GroupNormV-" + str(nGroupNormPlugin), np.dtype(np.float32), inputTensor.shape)
                 groupNormN = gs.Node("GroupNorm", "GroupNormN-" + str(nGroupNormPlugin), inputs=inputList, outputs=[groupNormV], attrs=OrderedDict([('epsilon', epsilon), ('bSwish', int(bSwish))]))
                 self.graph.nodes.append(groupNormN)
 
@@ -364,7 +364,7 @@ class OnnxOptimizer():
         shape = gs.Constant("Shape_KV_{}".format(mhca_idx), np.ascontiguousarray(np.array([0, 0, heads, 2, dims_per_head], dtype=np.int64)))
 
         # Reshape output tensor
-        output_reshape = gs.Variable("ReshapeKV_{}".format(mhca_idx), np.dtype(np.float16), None)
+        output_reshape = gs.Variable("ReshapeKV_{}".format(mhca_idx), np.dtype(np.float32), None)
         # Create fMHA plugin
         reshape = gs.Node(op="Reshape", name="Reshape_{}".format(mhca_idx), inputs=[output_kv, shape], outputs=[output_reshape])
         # Insert node
@@ -456,7 +456,7 @@ class OnnxOptimizer():
         shape = gs.Constant("Shape_QKV_{}".format(mha_idx), np.ascontiguousarray(np.array([0, 0, heads, 3, dims_per_head], dtype=np.int64)))
 
         # Reshape output tensor
-        output_shape = gs.Variable("ReshapeQKV_{}".format(mha_idx), np.dtype(np.float16), None)
+    output_shape = gs.Variable("ReshapeQKV_{}".format(mha_idx), np.dtype(np.float32), None)
         # Create fMHA plugin
         reshape = gs.Node(op="Reshape", name="Reshape_{}".format(mha_idx), inputs=[output_qkv, shape], outputs=[output_shape])
         # Insert node
